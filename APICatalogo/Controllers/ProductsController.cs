@@ -52,5 +52,37 @@ namespace APICatalogo.Controllers
 
             return new CreatedAtRouteResult("GetProduct", new { id = product.ProductId }, product);
         }
+
+        [HttpPut("{id}")]
+        public ActionResult Put(int id,[FromBody]Product product)
+        {
+            //[ApiController] validate this
+            //disable error messenger: (now stay in api controller)
+            //if (!modelstate.isvalid)
+            //{
+            //    return badrequest(modelstate);
+            //}
+            if (id != product.ProductId)
+            {
+                return BadRequest();
+            }
+            _context.Entry(product).State = EntityState.Modified;
+            _context.SaveChanges();
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult<Product> Delete(int id)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+
+            if(product == null)
+            {
+                return NotFound();
+            }
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+            return product;
+        }
     }
 }
