@@ -1,11 +1,26 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+/*
+ * ModelBinding:
+ * [BindNever] = don't match information to parameter
+ * [BindRequired] = error on ModelState if no data sended
+
+ * Data Source:
+ * [FromForm]
+ * [FromRoute]
+ * [FromQuery] = querystring
+ * [FromHeader] = HTTP Header
+ * [FromBody] = Body request
+ * [FromServices] = container of dependency injection
+*/
 
 namespace APICatalogo.Controllers
 {
@@ -16,7 +31,15 @@ namespace APICatalogo.Controllers
         private readonly AppDbContext _context;
         public CategoriesController(AppDbContext context)
         {
+            //this dependency injection stay visible to all ActionResult
             _context = context;
+        }
+
+        [HttpGet("hello/{name}")]
+        public ActionResult<string> GetHello([FromServices] IMyService myService, string name)
+        {
+            //Dependency Injection [FromServices] stay visible just to specified method
+            return myService.Hello(name);
         }
 
         [HttpGet("products")]

@@ -1,4 +1,5 @@
 using APICatalogo.Context;
+using APICatalogo.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ namespace APICatalogo
                     options.SerializerSettings.ReferenceLoopHandling
                     = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
+            //Transient = created every time is called
+            services.AddTransient<IMyService, MyService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,9 +1,25 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+
+/*
+ * ModelBinding:
+ * [BindNever] = don't match information to parameter
+ * [BindRequired] = error on ModelState if no data sended
+
+ * Data Source:
+ * [FromForm]
+ * [FromRoute]
+ * [FromQuery] = querystring
+ * [FromHeader] = HTTP Header
+ * [FromBody] = Body request
+ * [FromServices] = container of dependency injection
+*/
 
 namespace APICatalogo.Controllers
 {
@@ -18,16 +34,18 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public async Task<ActionResult<IEnumerable<Product>>> GetAsync()
         {
-            return _context.Products.AsNoTracking().ToList();
+            return await _context.Products.AsNoTracking().ToListAsync();
         }
 
+
+        //public async Task<ActionResult<Product>> GetAsync(int id,[BindRequired] string name) - ModelBinding
         [HttpGet("{id}", Name = "GetProduct")]
-        public ActionResult<Product> Get(int id)
+        public async Task<ActionResult<Product>> GetAsync([FromQuery]int id)
         {
-            var product = _context.Products.AsNoTracking()
-                .FirstOrDefault(p => p.ProductId == id);
+            var product = await _context.Products.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == id);
 
             if(product == null)
             {
