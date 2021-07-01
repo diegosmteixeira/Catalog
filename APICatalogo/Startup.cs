@@ -39,19 +39,27 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //This pipeline receives HTTP requests
+            //IApplicationBuilder => Pipeline requisition for application
+            //IWebHostEnvironment => what middleware is working
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage(); //Middleware of development
             }
 
+            //UseMiddlewareName - this middleware redirect https
             app.UseHttpsRedirection();
 
+            //Middleware for routing
             app.UseRouting();
 
-            app.UseAuthorization();
+            //Middleware for authorization
+            app.UseAuthorization(); 
 
+            //This Middleware run endpoint for current request
             app.UseEndpoints(endpoints =>
             {
+                //Add endpoints to Controller Actions without especify routes
                 endpoints.MapControllers();
             });
         }

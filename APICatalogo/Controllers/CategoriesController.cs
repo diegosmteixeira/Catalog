@@ -4,6 +4,7 @@ using APICatalogo.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +30,21 @@ namespace APICatalogo.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public CategoriesController(AppDbContext context)
+        private readonly IConfiguration _configuration;
+        public CategoriesController(AppDbContext context, IConfiguration config)
         {
             //this dependency injection stay visible to all ActionResult
             _context = context;
+            _configuration = config;
+        }
+
+        [HttpGet("autor")]
+        public string GetAutor()
+        {
+            var autor = _configuration["autor"];
+            var connect = _configuration["ConnectionStrings:DefaultConnection"];
+
+            return $"Autor: {autor} \nConnection: {connect}";
         }
 
         [HttpGet("hello/{name}")]
