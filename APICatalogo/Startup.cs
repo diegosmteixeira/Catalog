@@ -1,4 +1,5 @@
 using APICatalogo.Context;
+using APICatalogo.Filters;
 using APICatalogo.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +22,8 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<ApiLoggingFilter>();
+
             string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<AppDbContext>(options => 
             options.UseMySql(mySqlConnection, 
@@ -34,6 +37,7 @@ namespace APICatalogo
                 });
             //Transient = created every time is called
             services.AddTransient<IMyService, MyService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

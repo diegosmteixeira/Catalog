@@ -1,4 +1,5 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.Filters;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -34,11 +35,11 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<Product>>> GetAsync()
         {
             return await _context.Products.AsNoTracking().ToListAsync();
         }
-
 
         //public async Task<ActionResult<Product>> GetAsync(int id,[BindRequired] string name) - ModelBinding
         [HttpGet("{id}", Name = "GetProduct")]
