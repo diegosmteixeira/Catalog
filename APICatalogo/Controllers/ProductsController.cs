@@ -2,8 +2,8 @@
 using APICatalogo.Filters;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,12 +43,13 @@ namespace APICatalogo.Controllers
 
         //public async Task<ActionResult<Product>> GetAsync(int id,[BindRequired] string name) - ModelBinding
         [HttpGet("{id}", Name = "GetProduct")]
-        public async Task<ActionResult<Product>> GetAsync([FromQuery]int id)
+        public async Task<ActionResult<Product>> GetAsync([FromQuery] int id)
         {
+
             var product = await _context.Products.AsNoTracking()
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
-            if(product == null)
+            if (product == null)
             {
                 return NotFound();
             }
@@ -56,7 +57,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody]Product product)
+        public ActionResult Post([FromBody] Product product)
         {
             //[ApiController] validate this
             //disable error messenger: (now stay in api controller)
@@ -71,7 +72,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id,[FromBody]Product product)
+        public ActionResult Put(int id, [FromBody] Product product)
         {
             //[ApiController] validate this
             //disable error messenger: (now stay in api controller)
@@ -93,7 +94,7 @@ namespace APICatalogo.Controllers
         {
             var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
 
-            if(product == null)
+            if (product == null)
             {
                 return NotFound();
             }
