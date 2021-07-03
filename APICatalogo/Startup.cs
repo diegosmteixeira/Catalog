@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using APICatalogo.Logging;
 
 namespace APICatalogo
 {
@@ -42,7 +44,7 @@ namespace APICatalogo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             //This pipeline receives HTTP requests
             //IApplicationBuilder => Pipeline requisition for application
@@ -51,6 +53,11 @@ namespace APICatalogo
             {
                 app.UseDeveloperExceptionPage(); //Middleware of development
             }
+
+            loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+            {
+                LogLevel = LogLevel.Information
+            }));
 
             //Middleware - custom error
             app.ConfigureExceptionHandler();

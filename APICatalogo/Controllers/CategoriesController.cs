@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,11 +32,13 @@ namespace APICatalogo.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        public CategoriesController(AppDbContext context, IConfiguration config)
+        private readonly ILogger _logger;
+        public CategoriesController(AppDbContext context, IConfiguration config, ILogger<CategoriesController> logger)
         {
             //this dependency injection stay visible to all ActionResult
             _context = context;
             _configuration = config;
+            _logger = logger;
         }
 
         [HttpGet("autor")]
@@ -57,12 +60,14 @@ namespace APICatalogo.Controllers
         [HttpGet("products")]
         public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
         {
+            _logger.LogInformation("========GET api/categories/products ==========");
             return _context.Categories.Include(x => x.Products).ToList();
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
+            _logger.LogInformation("========GET api/categories ==========");
             try
             {
                 return _context.Categories.AsNoTracking().ToList();
@@ -83,8 +88,11 @@ namespace APICatalogo.Controllers
                 var category = _context.Categories.AsNoTracking()
                     .FirstOrDefault(p => p.CategoryId == id);
 
+                _logger.LogInformation($"========GET api/categories/id = {id}==========");
+
                 if (category == null)
                 {
+                    _logger.LogInformation("========GET api/categories/id = {id} NOT FOUND==========");
                     return NotFound($"Category id: {id} was not found.");
                 }
                 return category;
