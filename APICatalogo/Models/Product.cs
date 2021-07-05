@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace APICatalogo.Models
 {
@@ -15,8 +12,8 @@ namespace APICatalogo.Models
 
         [Required(ErrorMessage = "Name is required.")]
         [StringLength(20, ErrorMessage = "Name must be between 5 and 20 characters.",
-            
-            MinimumLength =5)]
+
+            MinimumLength = 5)]
         public string Name { get; set; }
 
         [Required]

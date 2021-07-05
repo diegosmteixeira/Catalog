@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +8,7 @@ namespace APICatalogo.Models
     [Table("Category")]
     public class Category
     {
-        public Category() 
+        public Category()
         {
             Products = new Collection<Product>();
         }
