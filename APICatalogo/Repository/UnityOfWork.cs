@@ -17,7 +17,7 @@ namespace APICatalogo.Repository
         {
             get
             {
-                return _productRepo = _productRepo ?? new ProductRepository(_context);
+                return _productRepo ??= new ProductRepository(_context);
             }
         }
 
@@ -25,7 +25,7 @@ namespace APICatalogo.Repository
         {
             get
             {
-                return _categoryRepo = _categoryRepo ?? new CategoryRepository(_context);
+                return _categoryRepo ??= new CategoryRepository(_context);
             }
         }
 

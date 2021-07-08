@@ -1,5 +1,5 @@
-﻿using APICatalogo.Context;
-using APICatalogo.Models;
+﻿using APICatalogo.Models;
+using APICatalogo.Repository;
 using APICatalogo.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,13 +30,13 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnityOfWork _uof;
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
-        public CategoriesController(AppDbContext context, IConfiguration config, ILogger<CategoriesController> logger)
+        public CategoriesController(IUnityOfWork uof, IConfiguration config, ILogger<CategoriesController> logger)
         {
             //this dependency injection stay visible to all ActionResult
-            _context = context;
+            _uof = uof;
             _configuration = config;
             _logger = logger;
         }
@@ -61,7 +61,7 @@ namespace APICatalogo.Controllers
         public ActionResult<IEnumerable<Category>> GetCategoriesProducts()
         {
             _logger.LogInformation("========GET api/categories/products ==========");
-            return _context.Categories.Include(x => x.Products).ToList();
+            return _uof.CategoryRepository.GetCategoryProducts().ToList();
         }
 
         [HttpGet]
@@ -70,7 +70,7 @@ namespace APICatalogo.Controllers
             _logger.LogInformation("========GET api/categories ==========");
             try
             {
-                return _context.Categories.AsNoTracking().ToList();
+                return _uof.CategoryRepository.Get().ToList();
 
             }
             catch (Exception)
@@ -85,8 +85,7 @@ namespace APICatalogo.Controllers
         {
             try
             {
-                var category = _context.Categories.AsNoTracking()
-                    .FirstOrDefault(p => p.CategoryId == id);
+                var category = _uof.CategoryRepository.Get().FirstOrDefault(p => p.CategoryId == id);
 
                 _logger.LogInformation($"========GET api/categories/id = {id}==========");
 
@@ -109,8 +108,8 @@ namespace APICatalogo.Controllers
         {
             try
             {
-                _context.Categories.Add(category);
-                _context.SaveChanges();
+                _uof.CategoryRepository.Add(category);
+                _uof.Commit();
 
                 return new CreatedAtRouteResult("GetCategory", new { id = category.CategoryId }, category);
             }
@@ -130,8 +129,8 @@ namespace APICatalogo.Controllers
                 {
                     return BadRequest($"Could not possible save changes to category id: {id}.");
                 }
-                _context.Entry(category).State = EntityState.Modified;
-                _context.SaveChanges();
+                _uof.CategoryRepository.Update(category);
+                _uof.Commit();
                 return Ok();
             }
             catch (Exception)
@@ -146,14 +145,14 @@ namespace APICatalogo.Controllers
         {
             try
             {
-                var category = _context.Categories.FirstOrDefault(p => p.CategoryId == id);
+                var category = _uof.CategoryRepository.Get().FirstOrDefault(p => p.CategoryId == id);
 
                 if (category == null)
                 {
                     return NotFound($"Category id: {id} was not found.");
                 }
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
+                _uof.CategoryRepository.Delete(category);
+                _uof.Commit();
                 return category;
             }
             catch (Exception)

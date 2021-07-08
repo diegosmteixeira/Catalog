@@ -11,7 +11,7 @@ namespace APICatalogo.Repository
         {
         }
 
-        public IEnumerable<Category> GetCategoriesProducts()
+        public IEnumerable<Category> GetCategoryProducts()
         {
             return Get().Include(x => x.Products);
         }

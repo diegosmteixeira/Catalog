@@ -1,11 +1,10 @@
-﻿using APICatalogo.Context;
-using APICatalogo.Filters;
+﻿using APICatalogo.Filters;
 using APICatalogo.Models;
+using APICatalogo.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 /*
  * ModelBinding:
@@ -27,26 +26,30 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        public ProductsController(AppDbContext context)
+        private readonly IUnityOfWork _uof;
+        public ProductsController(IUnityOfWork uof)
         {
-            _context = context;
+            _uof = uof;
+        }
+
+        [HttpGet("lowestprice")]
+        public ActionResult<IEnumerable<Product>> GetProductsByPrice()
+        {
+            return _uof.ProductRepository.GetProductsByPrice().ToList();
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAsync()
+        public ActionResult<IEnumerable<Product>> Get()
         {
-            return await _context.Products.AsNoTracking().ToListAsync();
+            return _uof.ProductRepository.Get().ToList();
         }
 
-        //public async Task<ActionResult<Product>> GetAsync(int id,[BindRequired] string name) - ModelBinding
         [HttpGet("{id}", Name = "GetProduct")]
-        public async Task<ActionResult<Product>> GetAsync([FromQuery] int id)
+        public ActionResult<Product> Get(int id)
         {
 
-            var product = await _context.Products.AsNoTracking()
-                .FirstOrDefaultAsync(p => p.ProductId == id);
+            var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
 
             if (product == null)
             {
@@ -58,14 +61,9 @@ namespace APICatalogo.Controllers
         [HttpPost]
         public ActionResult Post([FromBody] Product product)
         {
-            //[ApiController] validate this
-            //disable error messenger: (now stay in api controller)
-            //if (!modelstate.isvalid)
-            //{
-            //    return badrequest(modelstate);
-            //}
-            _context.Products.Add(product);
-            _context.SaveChanges();
+
+            _uof.ProductRepository.Add(product);
+            _uof.Commit();
 
             return new CreatedAtRouteResult("GetProduct", new { id = product.ProductId }, product);
         }
@@ -73,32 +71,27 @@ namespace APICatalogo.Controllers
         [HttpPut("{id}")]
         public ActionResult Put(int id, [FromBody] Product product)
         {
-            //[ApiController] validate this
-            //disable error messenger: (now stay in api controller)
-            //if (!modelstate.isvalid)
-            //{
-            //    return badrequest(modelstate);
-            //}
+
             if (id != product.ProductId)
             {
                 return BadRequest();
             }
-            _context.Entry(product).State = EntityState.Modified;
-            _context.SaveChanges();
+            _uof.ProductRepository.Update(product);
+            _uof.Commit();
             return Ok();
         }
 
         [HttpDelete("{id}")]
         public ActionResult<Product> Delete(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
 
             if (product == null)
             {
                 return NotFound();
             }
-            _context.Products.Remove(product);
-            _context.SaveChanges();
+            _uof.ProductRepository.Delete(product);
+            _uof.Commit();
             return product;
         }
     }
