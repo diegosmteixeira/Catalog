@@ -11,6 +11,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using APICatalogo.Logging;
 using APICatalogo.Repository;
+using AutoMapper;
+using APICatalogo.DTO.Mappings;
 
 namespace APICatalogo
 {
@@ -26,6 +28,14 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             services.AddScoped<IUnityOfWork, UnityOfWork>();
 
             services.AddScoped<ApiLoggingFilter>();

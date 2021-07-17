@@ -1,6 +1,8 @@
-﻿using APICatalogo.Filters;
+﻿using APICatalogo.DTO;
+using APICatalogo.Filters;
 using APICatalogo.Models;
 using APICatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
@@ -27,62 +29,73 @@ namespace APICatalogo.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IUnityOfWork _uof;
-        public ProductsController(IUnityOfWork uof)
+        private readonly IMapper _mapper;
+        public ProductsController(IUnityOfWork uof, IMapper mapper)
         {
             _uof = uof;
+            _mapper = mapper;
         }
 
         [HttpGet("lowestprice")]
-        public ActionResult<IEnumerable<Product>> GetProductsByPrice()
+        public ActionResult<IEnumerable<ProductDTO>> GetProductsByPrice()
         {
-            return _uof.ProductRepository.GetProductsByPrice().ToList();
+            var products = _uof.ProductRepository.GetProductsByPrice().ToList();
+            var productsDto = _mapper.Map<List<ProductDTO>>(products);
+            return productsDto;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<IEnumerable<ProductDTO>> Get()
         {
-            return _uof.ProductRepository.Get().ToList();
+            var products = _uof.ProductRepository.Get().ToList();
+            var productsDto = _mapper.Map<List<ProductDTO>>(products);
+            return productsDto;
         }
 
         [HttpGet("{id}", Name = "GetProduct")]
-        public ActionResult<Product> Get(int id)
+        public ActionResult<ProductDTO> Get(int id)
         {
-
             var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
 
             if (product == null)
             {
                 return NotFound();
             }
-            return product;
+            var productDto = _mapper.Map<ProductDTO>(product);
+            return productDto;
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Product product)
+        public ActionResult Post([FromBody] ProductDTO productDto)
         {
-
+            var product = _mapper.Map<Product>(productDto);
             _uof.ProductRepository.Add(product);
             _uof.Commit();
 
-            return new CreatedAtRouteResult("GetProduct", new { id = product.ProductId }, product);
+            var productDTO = _mapper.Map<ProductDTO>(product);
+
+            return new CreatedAtRouteResult("GetProduct", new { id = product.ProductId }, productDTO);
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] Product product)
+        public ActionResult Put(int id, [FromBody] ProductDTO productDto)
         {
 
-            if (id != product.ProductId)
+            if (id != productDto.ProductId)
             {
                 return BadRequest();
             }
+
+            var product = _mapper.Map<Product>(productDto);
+
             _uof.ProductRepository.Update(product);
             _uof.Commit();
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<Product> Delete(int id)
+        public ActionResult<ProductDTO> Delete(int id)
         {
             var product = _uof.ProductRepository.GetById(p => p.ProductId == id);
 
@@ -92,7 +105,9 @@ namespace APICatalogo.Controllers
             }
             _uof.ProductRepository.Delete(product);
             _uof.Commit();
-            return product;
+
+            var productDTO = _mapper.Map<ProductDTO>(product);
+            return productDTO;
         }
     }
 }
