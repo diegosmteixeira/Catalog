@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 /*
  * ModelBinding:
@@ -63,21 +64,21 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("products")]
-        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesProducts()
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesProducts()
         {
             _logger.LogInformation("========GET api/categories/products ==========");
-            var category = _uof.CategoryRepository.GetCategoryProducts().ToList();
+            var category = await _uof.CategoryRepository.GetCategoryProducts();
             var categoryDto = _mapper.Map<List<CategoryDTO>>(category);
             return categoryDto;
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> Get([FromQuery] CategoriesParameters categoriesParameters)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoriesParameters categoriesParameters)
         {
             _logger.LogInformation("========GET api/categories ==========");
             try
             {
-                var category = _uof.CategoryRepository.GetCategoryPages(categoriesParameters);
+                var category = await _uof.CategoryRepository.GetCategoryPages(categoriesParameters);
 
                 var metadata = new
                 {
@@ -101,11 +102,11 @@ namespace APICatalogo.Controllers
         }
 
         [HttpGet("{id}", Name = "GetCategory")]
-        public ActionResult<CategoryDTO> Get(int id)
+        public async Task<ActionResult<CategoryDTO>> Get(int id)
         {
             try
             {
-                var category = _uof.CategoryRepository.Get().FirstOrDefault(p => p.CategoryId == id);
+                var category = await _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 _logger.LogInformation($"========GET api/categories/id = {id}==========");
 
@@ -125,13 +126,13 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] CategoryDTO categoryDto)
+        public async Task<ActionResult> Post([FromBody] CategoryDTO categoryDto)
         {
             try
             {
                 var category = _mapper.Map<Category>(categoryDto);
                 _uof.CategoryRepository.Add(category);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var categoryDTO = _mapper.Map<CategoryDTO>(category);
                 return new CreatedAtRouteResult("GetCategory", new { id = category.CategoryId }, categoryDTO);
@@ -144,7 +145,7 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Put(int id, [FromBody] CategoryDTO categoryDto)
+        public async Task<ActionResult> Put(int id, [FromBody] CategoryDTO categoryDto)
         {
             try
             {
@@ -156,7 +157,7 @@ namespace APICatalogo.Controllers
                 var category = _mapper.Map<Category>(categoryDto);
 
                 _uof.CategoryRepository.Update(category);
-                _uof.Commit();
+                await _uof.Commit();
                 return Ok();
             }
             catch (Exception)
@@ -167,18 +168,18 @@ namespace APICatalogo.Controllers
         }
 
         [HttpDelete("{id}")]
-        public ActionResult<CategoryDTO> Delete(int id)
+        public async Task<ActionResult<CategoryDTO>> Delete(int id)
         {
             try
             {
-                var category = _uof.CategoryRepository.Get().FirstOrDefault(p => p.CategoryId == id);
+                var category = await _uof.CategoryRepository.GetById(c => c.CategoryId == id);
 
                 if (category == null)
                 {
                     return NotFound($"Category id: {id} was not found.");
                 }
                 _uof.CategoryRepository.Delete(category);
-                _uof.Commit();
+                await _uof.Commit();
 
                 var categoryDto = _mapper.Map<CategoryDTO>(category);
                 return categoryDto;
