@@ -13,6 +13,10 @@ using APICatalogo.Logging;
 using APICatalogo.Repository;
 using AutoMapper;
 using APICatalogo.DTO.Mappings;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace APICatalogo
 {
@@ -44,6 +48,25 @@ namespace APICatalogo
             services.AddDbContext<AppDbContext>(options => 
             options.UseMySql(mySqlConnection, 
             ServerVersion.AutoDetect(mySqlConnection)));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(
+                JwtBearerDefaults.AuthenticationScheme).
+                AddJwtBearer(options =>
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidAudience = Configuration["TokenConfiguration:Audience"],
+                    ValidIssuer = Configuration["TokenConfiguration:Issuer"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(Configuration["Jwt:key"]))
+                });
 
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
@@ -80,6 +103,9 @@ namespace APICatalogo
 
             //Middleware for routing
             app.UseRouting();
+
+            //Midleware for authentication
+            app.UseAuthentication();
 
             //Middleware for authorization
             app.UseAuthorization(); 
