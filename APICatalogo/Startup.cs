@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 
 namespace APICatalogo
 {
@@ -32,6 +34,8 @@ namespace APICatalogo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             var mappingConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
@@ -68,6 +72,18 @@ namespace APICatalogo
                         Encoding.UTF8.GetBytes(Configuration["Jwt:key"]))
                 });
 
+            services.AddApiVersioning(options =>
+            {
+                //Default version when unspecified
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                //Set default API version
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                //Report API version on response
+                options.ReportApiVersions = true;
+                //Header API version
+                options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+            });
+
             services.AddControllers()
                 .AddNewtonsoftJson(options =>
                 {
@@ -98,6 +114,12 @@ namespace APICatalogo
             //Middleware - custom error
             app.ConfigureExceptionHandler();
 
+            //Enable CORS for Any Origin
+            app.UseCors(options => options
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
             //UseMiddlewareName - this middleware redirect https
             app.UseHttpsRedirection();
 
@@ -108,7 +130,7 @@ namespace APICatalogo
             app.UseAuthentication();
 
             //Middleware for authorization
-            app.UseAuthorization(); 
+            app.UseAuthorization();
 
             //This Middleware run endpoint for current request
             app.UseEndpoints(endpoints =>
