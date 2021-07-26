@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Route("api/[controller]")]
+    [Produces("application/json")]
+    [ApiVersion("1.0")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     [ApiController]
     public class AuthorizationController : ControllerBase
     {
@@ -32,6 +34,11 @@ namespace APICatalogo.Controllers
                 + DateTime.Now.ToLongDateString();
         }
 
+        /// <summary>
+        /// Registers new user
+        /// </summary>
+        /// <param name="model">Object UserDTO</param>
+        /// <returns>Status 200 and client's JWT Token</returns>
         [HttpPost("register")]
         public async Task<ActionResult> RegisterUser([FromBody] UserDTO model)
         {
@@ -53,6 +60,11 @@ namespace APICatalogo.Controllers
             return Ok(GenerateToken(model));
         }
 
+        /// <summary>
+        /// Checks the user's credentials
+        /// </summary>
+        /// <param name="userInfo">Object UserDTO</param>
+        /// <returns>Status 200 and client's JWT Token</returns>
         [HttpPost("login")]
         public async Task<ActionResult> Login([FromBody] UserDTO userInfo)
         {

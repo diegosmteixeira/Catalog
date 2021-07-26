@@ -27,7 +27,10 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
-    [Route("api/[Controller]")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
+    [Produces("application/json")]
+    [ApiVersion("1.0")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -47,6 +50,10 @@ namespace APICatalogo.Controllers
             return productsDto;
         }
 
+        /// <summary>
+        /// Show all products
+        /// </summary>
+        /// <returns>Return a product object list</returns>
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductsParameters productsParameters)
@@ -68,6 +75,11 @@ namespace APICatalogo.Controllers
             return productsDto;
         }
 
+        /// <summary>
+        /// Get a product by your product identifierId
+        /// </summary>
+        /// <param name="id">product code</param>
+        /// <returns>Product Object</returns>
         [HttpGet("{id}", Name = "GetProduct")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {

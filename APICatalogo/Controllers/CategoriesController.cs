@@ -31,8 +31,10 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
+    [Produces("application/json")]
+    [ApiVersion("1.0")]
     [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[Controller]")]
+    [Route("api/v{v:apiVersion}/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
     {
@@ -103,7 +105,14 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a Category by id
+        /// </summary>
+        /// <param name="id">category code</param>
+        /// <returns>Category Object</returns>
         [HttpGet("{id}", Name = "GetCategory")]
+        [ProducesResponseType(typeof(ProductDTO), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CategoryDTO>> Get(int id)
         {
             try
@@ -127,7 +136,24 @@ namespace APICatalogo.Controllers
             }
         }
 
+        /// <summary>
+        /// Include a new category
+        /// </summary>
+        /// <remarks>
+        /// Request example:
+        /// 
+        ///     POST api/categories
+        ///     {
+        ///         "categoryId": 1,
+        ///         "name": "category1",
+        ///         "imageUrl: "http://test.io/1.jpg"
+        ///     }
+        /// </remarks>
+        /// <param name="categoryDto">Category Object</param>
+        /// <returns>Return a Category Object</returns>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> Post([FromBody] CategoryDTO categoryDto)
         {
             try
@@ -147,6 +173,8 @@ namespace APICatalogo.Controllers
         }
 
         [HttpPut("{id}")]
+        [ApiConventionMethod(typeof(DefaultApiConventions),
+            nameof(DefaultApiConventions.Put))]
         public async Task<ActionResult> Put(int id, [FromBody] CategoryDTO categoryDto)
         {
             try

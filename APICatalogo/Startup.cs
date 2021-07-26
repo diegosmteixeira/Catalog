@@ -1,24 +1,29 @@
 using APICatalogo.Context;
-using APICatalogo.Filters;
-using APICatalogo.Services;
+using APICatalogo.DTO.Mappings;
 using APICatalogo.Extensions;
+using APICatalogo.Filters;
+using APICatalogo.Logging;
+using APICatalogo.Repository;
+using APICatalogo.Services;
+using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using APICatalogo.Logging;
-using APICatalogo.Repository;
-using AutoMapper;
-using APICatalogo.DTO.Mappings;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Security.Cryptography.Xml;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Versioning;
 
 namespace APICatalogo
 {
@@ -49,8 +54,8 @@ namespace APICatalogo
             services.AddScoped<ApiLoggingFilter>();
 
             string mySqlConnection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<AppDbContext>(options => 
-            options.UseMySql(mySqlConnection, 
+            services.AddDbContext<AppDbContext>(options =>
+            options.UseMySql(mySqlConnection,
             ServerVersion.AutoDetect(mySqlConnection)));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
@@ -71,6 +76,59 @@ namespace APICatalogo
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(Configuration["Jwt:key"]))
                 });
+
+            //Swagger
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "APICatalog",
+                    Description = "Catalog of products and categories",
+                    TermsOfService = new Uri("https://texzter.io/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Texzter",
+                        Email = "diegosmteixeira@gmail.com",
+                        Url = new Uri("https://github.com/diegosmteixeira"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use on LICX",
+                        Url = new Uri("https://texzter.io/license")
+                    }
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization header using the Bearer scheme." +
+                    " \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below." +
+                    "\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+            });
 
             services.AddApiVersioning(options =>
             {
@@ -114,12 +172,6 @@ namespace APICatalogo
             //Middleware - custom error
             app.ConfigureExceptionHandler();
 
-            //Enable CORS for Any Origin
-            app.UseCors(options => options
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-
             //UseMiddlewareName - this middleware redirect https
             app.UseHttpsRedirection();
 
@@ -131,6 +183,21 @@ namespace APICatalogo
 
             //Middleware for authorization
             app.UseAuthorization();
+
+            //Enable CORS for Any Origin
+            app.UseCors(options => options
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
+            //Swagger
+            app.UseSwagger();
+
+            //SwaggerUI
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "APICatalog");
+            });
 
             //This Middleware run endpoint for current request
             app.UseEndpoints(endpoints =>

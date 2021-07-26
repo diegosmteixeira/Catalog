@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>APICatalogo</name>
+    </assembly>
+    <members>
+        <member name="M:APICatalogo.Controllers.AuthorizationController.RegisterUser(APICatalogo.DTO.UserDTO)">
+            <summary>
+            Registers new user
+            </summary>
+            <param name="model">Object UserDTO</param>
+            <returns>Status 200 and client's JWT Token</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.AuthorizationController.Login(APICatalogo.DTO.UserDTO)">
+            <summary>
+            Checks the user's credentials
+            </summary>
+            <param name="userInfo">Object UserDTO</param>
+            <returns>Status 200 and client's JWT Token</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriesController.Get(System.Int32)">
+            <summary>
+            Get a Category by id
+            </summary>
+            <param name="id">category code</param>
+            <returns>Category Object</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.CategoriesController.Post(APICatalogo.DTO.CategoryDTO)">
+            <summary>
+            Include a new category
+            </summary>
+            <remarks>
+            Request example:
+            
+                POST api/categories
+                {
+                    "categoryId": 1,
+                    "name": "category1",
+                    "imageUrl: "http://test.io/1.jpg"
+                }
+            </remarks>
+            <param name="categoryDto">Category Object</param>
+            <returns>Return a Category Object</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.ProductsController.Get(APICatalogo.Pagination.ProductsParameters)">
+            <summary>
+            Show all products
+            </summary>
+            <returns>Return a product object list</returns>
+        </member>
+        <member name="M:APICatalogo.Controllers.ProductsController.Get(System.Int32)">
+            <summary>
+            Get a product by your product identifierId
+            </summary>
+            <param name="id">product code</param>
+            <returns>Product Object</returns>
+        </member>
+    </members>
+</doc>
