@@ -22,7 +22,6 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography.Xml;
 using System.Text;
 
 namespace APICatalogo

@@ -33,7 +33,7 @@ namespace APICatalogo.Controllers
 {
     [Produces("application/json")]
     [ApiVersion("1.0")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/v{v:apiVersion}/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -42,13 +42,14 @@ namespace APICatalogo.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
-        public CategoriesController(IUnityOfWork uof, IConfiguration config, ILogger<CategoriesController> logger, IMapper mapper)
+
+        public CategoriesController(IUnityOfWork uof, IConfiguration config, IMapper mapper, ILogger<CategoriesController> logger)
         {
             //this dependency injection stay visible to all ActionResult
             _uof = uof;
-            _configuration = config;
-            _logger = logger;
             _mapper = mapper;
+            _logger = logger;
+            _configuration = config;
         }
 
         [HttpGet("autor")]
@@ -76,6 +77,7 @@ namespace APICatalogo.Controllers
             return categoryDto;
         }
 
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoriesParameters categoriesParameters)
         {
@@ -92,7 +94,8 @@ namespace APICatalogo.Controllers
                     category.HasNext,
                     category.HasPrevious
                 };
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+                //Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+                //throw new Exception();
 
                 var categoryDto = _mapper.Map<List<CategoryDTO>>(category);
                 return categoryDto;
@@ -100,10 +103,12 @@ namespace APICatalogo.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Database categories access error.");
+                //return StatusCode(StatusCodes.Status500InternalServerError, "Database categories access error.");
+
+                return BadRequest();
             }
         }
+        
 
         /// <summary>
         /// Get a Category by id
@@ -131,8 +136,7 @@ namespace APICatalogo.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Database categories access error.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Database categories access error.");
             }
         }
 
