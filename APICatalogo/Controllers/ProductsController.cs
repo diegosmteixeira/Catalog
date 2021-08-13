@@ -5,10 +5,9 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.OData.Query;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 /*
@@ -27,6 +26,7 @@ using System.Threading.Tasks;
 
 namespace APICatalogo.Controllers
 {
+    [EnableQuery]
     [ApiConventionType(typeof(DefaultApiConventions))]
     [Produces("application/json")]
     [ApiVersion("1.0")]

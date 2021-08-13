@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -147,6 +148,10 @@ namespace APICatalogo
                     options.SerializerSettings.ReferenceLoopHandling
                     = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
+
+            //Extends the 'AddControllers()' service to register OData service
+            services.AddControllers().AddOData(option => option.Select().Filter().Count().OrderBy().Expand());
+
             //Transient = created every time is called
             services.AddTransient<IMyService, MyService>();
 
